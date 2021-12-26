@@ -2,16 +2,23 @@ package main
 
 import (
 	"fmt"
+	"math/rand"
+	"time"
 )
 
 var playerList = [2]string{"O", "X"}
 var isDone = false
+var player int = 0
 
 func main() {
 	board := [3][3]string{}
 	turn := 0
 
-	fmt.Println("TicTacGo")
+	// randomize player
+	rand.Seed(time.Now().UnixNano())
+	player = rand.Intn(100) % 2
+
+	fmt.Printf("TicTacGo : Playing as %s\n", playerList[player])
 
 	for !isDone {
 		move(&turn, &board)
@@ -29,17 +36,23 @@ func move(t *int, b *[3][3]string) {
 
 	printBoard(b)
 	fmt.Printf("[%s] turn: ", playerList[p])
-	fmt.Scanf("%d,%d", &input[0], &input[1])
 
-	if isValidMove(input, b) {
-		b[input[0]][input[1]] = playerList[p]
-		if isWinningMove(&playerList[p], &input, b) {
-			fmt.Printf("%s win!\n", playerList[p])
-			isDone = true
+	if p != player {
+		aiMove(b)
+	} else {
+		fmt.Scanf("%d,%d", &input[0], &input[1])
+
+		if isValidMove(input, b) {
+			b[input[0]][input[1]] = playerList[p]
+			if isWinningMove(&playerList[p], &input, b) {
+				fmt.Printf("%s win!\n", playerList[p])
+				isDone = true
+			}
+
+			*t++
 		}
-
-		*t++
 	}
+
 }
 
 func isValidMove(i [2]int, b *[3][3]string) bool {
@@ -112,4 +125,10 @@ func printBoard(b *[3][3]string) {
 		}
 		fmt.Println("")
 	}
+}
+
+func aiMove(b *[3][3]string) {
+	// TODO: Implements MiniMax
+	s := ""
+	fmt.Scanf("%s", &s)
 }
