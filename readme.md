@@ -1,4 +1,4 @@
 # TicTacGo
 TODO:
 - [x] Random Player
-- [ ] Implement MiniMax
+- [x] Implement MiniMax
