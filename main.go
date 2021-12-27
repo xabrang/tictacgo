@@ -38,19 +38,19 @@ func move(t *int, b *[3][3]string) {
 	fmt.Printf("[%s] turn: ", playerList[p])
 
 	if p != player {
-		aiMove(b)
+		input = aiMove(*b)
 	} else {
 		fmt.Scanf("%d,%d", &input[0], &input[1])
+	}
 
-		if isValidMove(input, b) {
-			b[input[0]][input[1]] = playerList[p]
-			if isWinningMove(&playerList[p], &input, b) {
-				fmt.Printf("%s win!\n", playerList[p])
-				isDone = true
-			}
-
-			*t++
+	if isValidMove(input, b) {
+		b[input[0]][input[1]] = playerList[p]
+		if isWinningMove(&playerList[p], &input, b) {
+			fmt.Printf("%s win!\n", playerList[p])
+			isDone = true
 		}
+
+		*t++
 	}
 
 }
@@ -127,8 +127,129 @@ func printBoard(b *[3][3]string) {
 	}
 }
 
-func aiMove(b *[3][3]string) {
-	// TODO: Implements MiniMax
-	s := ""
-	fmt.Scanf("%s", &s)
+func aiMove(b [3][3]string) [2]int {
+	bestMove := -1000
+	move := [2]int{-1, -1}
+	for x, c := range b {
+		for y, s := range c {
+			if s != "" {
+				continue
+			}
+			b[x][y] = playerList[player]
+
+			moveVal := minimax(b, 0, false)
+
+			b[x][y] = ""
+
+			if moveVal > bestMove {
+				bestMove = moveVal
+				move = [2]int{x, y}
+			}
+		}
+	}
+	fmt.Println(move[0], ",", move[1])
+	return move
+}
+
+func evaluateMove(b *[3][3]string) int {
+	// check row
+	for x, _ := range *b {
+		if (*b)[x][0] == (*b)[x][1] && (*b)[x][1] == (*b)[x][2] {
+			if (*b)[x][0] == playerList[player] {
+				return 10
+			} else if (*b)[x][0] == playerList[(player+1)%2] {
+				return -10
+			}
+		}
+	}
+	// check col
+	for x, _ := range *b {
+		if (*b)[0][x] == (*b)[1][x] && (*b)[1][x] == (*b)[2][x] {
+			if (*b)[0][x] == playerList[player] {
+				return 10
+			} else if (*b)[0][x] == playerList[(player+1)%2] {
+				return -10
+			}
+		}
+	}
+	// check diagonal
+	if (*b)[0][0] == (*b)[1][1] && (*b)[1][1] == (*b)[2][2] {
+		if (*b)[0][0] == playerList[player] {
+			return 10
+		} else if (*b)[0][0] == playerList[(player+1)%2] {
+			return -10
+		}
+	}
+	if (*b)[0][2] == (*b)[1][1] && (*b)[1][1] == (*b)[2][0] {
+		if (*b)[1][1] == playerList[player] {
+			return 10
+		} else if (*b)[1][1] == playerList[(player+1)%2] {
+			return -10
+		}
+	}
+	return 0
+}
+
+func minimax(b [3][3]string, d int, isMax bool) int {
+	score := evaluateMove(&b)
+	best := -1000
+
+	if score == 10 {
+		return score
+	}
+
+	if score == -10 {
+		return score
+	}
+
+	if checkBoard(&b) == false {
+		return 0
+	}
+
+	if isMax {
+		for x, c := range b {
+			for y, s := range c {
+				if s != "" {
+					continue
+				}
+
+				b[x][y] = playerList[player]
+
+				best = max(best, minimax(b, d+1, !isMax))
+
+				b[x][y] = ""
+			}
+		}
+		return best
+	} else {
+		for x, c := range b {
+			for y, s := range c {
+				if s != "" {
+					continue
+				}
+
+				b[x][y] = playerList[player]
+
+				best = min(best, minimax(b, d+1, !isMax))
+
+				b[x][y] = ""
+			}
+		}
+
+		return best
+	}
+}
+
+func max(a int, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
+func min(a int, b int) int {
+	if a < b {
+		return a
+	}
+	return b
 }
